@@ -57,6 +57,32 @@ public class MutableImage {
         this.currentRepresentation = bitmap;
     }
 
+    public void fixOrientation(int deviceOrientation) throws ImageMutationFailedException {
+
+        int height = this.currentRepresentation.getHeight();
+        int width= this.currentRepresentation.getWidth();
+        switch (deviceOrientation) {
+            case 0: // portrait - 0
+            case 2: // portrait upside down - 180
+                if (height < width) {
+                    rotate(6);
+                }
+                break;
+            case 1: // landscape left - 90
+                if (height > width) {
+                    rotate(1);
+                }
+                break;
+            case 3: // landscape right - 270
+                if (height > width) {
+                    rotate(3);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     public void fixOrientation() throws ImageMutationFailedException {
         try {
             Metadata metadata = originalImageMetaData();

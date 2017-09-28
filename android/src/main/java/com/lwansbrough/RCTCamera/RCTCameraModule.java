@@ -528,6 +528,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
         RCTCamera.getInstance().adjustCameraRotationToDeviceOrientation(options.getInt("type"), deviceOrientation);
         camera.setPreviewCallback(null);
 
+        final int currentDeviceOrientation = deviceOrientation;
         Camera.PictureCallback captureCallback = new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(final byte[] data, Camera camera) {
@@ -537,7 +538,7 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
-                        processImage(new MutableImage(data), options, promise);
+                        processImage(new MutableImage(data), options, currentDeviceOrientation, promise);
                     }
                 });
 
@@ -559,11 +560,11 @@ public class RCTCameraModule extends ReactContextBaseJavaModule
      * synchronized in order to prevent the user crashing the app by taking many photos and them all being processed
      * concurrently which would blow the memory (esp on smaller devices), and slow things down.
      */
-    private synchronized void processImage(MutableImage mutableImage, ReadableMap options, Promise promise) {
+    private synchronized void processImage(MutableImage mutableImage, ReadableMap options, int deviceOrientation, Promise promise) {
         boolean shouldFixOrientation = options.hasKey("fixOrientation") && options.getBoolean("fixOrientation");
         if(shouldFixOrientation) {
             try {
-                mutableImage.fixOrientation();
+                mutableImage.fixOrientation(deviceOrientation);
             } catch (MutableImage.ImageMutationFailedException e) {
                 promise.reject("Error fixing orientation image", e);
             }
